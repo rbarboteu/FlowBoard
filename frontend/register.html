@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FlowBoard — Nova Empresa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #06080F;
+      --surface: #0D1117;
+      --glass:   rgba(255,255,255,0.04);
+      --border:  rgba(255,255,255,0.07);
+      --accent:  #6366F1;
+      --accent2: #8B5CF6;
+      --glow:    rgba(99,102,241,0.35);
+      --text:    #F0F2FF;
+      --muted:   #6B7280;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      color: var(--text);
+      padding: 40px 20px;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,0.035) 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-orbs { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+    .orb { position: absolute; border-radius: 50%; filter: blur(120px); animation: drift 20s ease-in-out infinite; }
+    .orb-1 { width: 500px; height: 500px; background: var(--accent); top: -150px; right: -100px; opacity: 0.12; animation-delay: 0s; }
+    .orb-2 { width: 350px; height: 350px; background: var(--accent2); bottom: -100px; left: -100px; opacity: 0.1; animation-delay: -8s; }
+
+    @keyframes drift {
+      0%,100% { transform: translate(0,0) scale(1); }
+      50%      { transform: translate(30px,-20px) scale(1.05); }
+    }
+
+    .card-wrap {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 480px;
+      animation: fadeUp 0.6s cubic-bezier(.16,1,.3,1) both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 44px 40px;
+      backdrop-filter: blur(24px);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.03), 0 32px 80px rgba(0,0,0,0.5), 0 0 80px var(--glow);
+    }
+
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 4px 20px var(--glow);
+    }
+    .logo-text {
+      font-family: 'Syne', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff 40%, #a5b4fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .page-title {
+      text-align: center;
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: 14px;
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(99,102,241,0.2);
+    }
+
+    .field { margin-bottom: 14px; }
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+    .field input {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 13px 16px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14.5px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .field input::placeholder { color: #374151; }
+    .field input:focus {
+      border-color: var(--accent);
+      background: rgba(99,102,241,0.08);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+
+    .slug-preview {
+      font-size: 12px;
+      color: #a5b4fc;
+      margin-top: 5px;
+      min-height: 18px;
+      font-weight: 500;
+    }
+
+    .btn-register {
+      width: 100%;
+      margin-top: 24px;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 24px var(--glow);
+    }
+    .btn-register::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .btn-register:hover::before { opacity: 1; }
+    .btn-register:hover { transform: translateY(-1px); box-shadow: 0 8px 32px var(--glow); }
+    .btn-register:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .alert {
+      padding: 13px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-top: 16px;
+      display: none;
+      animation: fadeUp 0.3s ease;
+    }
+    .alert-error   { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); color: #FCA5A5; }
+    .alert-success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25); color: #6EE7B7; }
+
+    .login-link {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .login-link a { color: #a5b4fc; text-decoration: none; font-weight: 500; }
+    .login-link a:hover { color: white; }
+  </style>
+</head>
+<body>
+
+<div class="bg-orbs">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+</div>
+
+<div class="card-wrap">
+  <div class="card">
+    <div class="logo-wrap">
+      <div class="logo-icon">⚡</div>
+      <div class="logo-text">FlowBoard</div>
+    </div>
+    <div class="page-title">Criar nova conta</div>
+
+    <!-- Dados da empresa -->
+    <div class="section-title">Sua Empresa</div>
+
+    <div class="field">
+      <label>Nome da Empresa</label>
+      <input type="text" id="nomeEmpresa" placeholder="Ex: Acme Corp" oninput="gerarSlug()" />
+    </div>
+
+    <div class="field">
+      <label>Código de Acesso</label>
+      <input type="text" id="slug" placeholder="ex: acme-corp" oninput="normalizarSlug()" />
+      <div class="hint">Usado no login. Apenas letras, números e hífens.</div>
+      <div class="slug-preview" id="slugPreview"></div>
+    </div>
+
+    <!-- Dados do admin -->
+    <div class="section-title">Administrador</div>
+
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="adminEmail" placeholder="admin@suaempresa.com" />
+    </div>
+
+    <div class="field">
+      <label>Senha</label>
+      <input type="password" id="adminSenha" placeholder="Mínimo 6 caracteres" />
+    </div>
+
+    <div class="field">
+      <label>Confirmar Senha</label>
+      <input type="password" id="adminSenhaConf" placeholder="Repita a senha" />
+    </div>
+
+    <button class="btn-register" id="btnRegistrar" onclick="registrar()">
+      Criar minha conta
+    </button>
+
+    <div class="alert alert-error" id="erro"></div>
+    <div class="alert alert-success" id="sucesso"></div>
+
+    <div class="login-link">
+      Já tem conta? <a href="index.html">← Fazer login</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = 'http://localhost:5291';
+
+  function gerarSlug() {
+    const nome = document.getElementById('nomeEmpresa').value;
+    const slug = nome
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-');
+    document.getElementById('slug').value = slug;
+    atualizarPreview(slug);
+  }
+
+  function normalizarSlug() {
+    const input = document.getElementById('slug');
+    const slug = input.value
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9-]/g, '')
+      .replace(/-+/g, '-');
+    input.value = slug;
+    atualizarPreview(slug);
+  }
+
+  function atualizarPreview(slug) {
+    const el = document.getElementById('slugPreview');
+    el.textContent = slug ? `Login: "${slug}"` : '';
+  }
+
+  async function registrar() {
+    const btn       = document.getElementById('btnRegistrar');
+    const erro      = document.getElementById('erro');
+    const sucesso   = document.getElementById('sucesso');
+    const nome      = document.getElementById('nomeEmpresa').value.trim();
+    const slug      = document.getElementById('slug').value.trim();
+    const email     = document.getElementById('adminEmail').value.trim();
+    const senha     = document.getElementById('adminSenha').value;
+    const senhaConf = document.getElementById('adminSenhaConf').value;
+
+    erro.style.display = 'none';
+    sucesso.style.display = 'none';
+
+    if (!nome || !slug || !email || !senha) {
+      erro.textContent = 'Preencha todos os campos.';
+      erro.style.display = 'block';
+      return;
+    }
+
+    if (senha !== senhaConf) {
+      erro.textContent = 'As senhas não coincidem.';
+      erro.style.display = 'block';
+      return;
+    }
+
+    if (senha.length < 6) {
+      erro.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+      erro.style.display = 'block';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Criando conta...';
+
+    try {
+      const res = await fetch(`${API}/api/auth/register-tenant`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          companyName:   nome,
+          slug:          slug,
+          adminEmail:    email,
+          adminPassword: senha
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        erro.textContent = data.error || 'Erro ao criar conta.';
+        erro.style.display = 'block';
+        return;
+      }
+
+      // Login automático
+      sessionStorage.setItem('token', data.token);
+      sessionStorage.setItem('email', data.email);
+      sessionStorage.setItem('role', data.role);
+
+      sucesso.textContent = `✓ Conta criada! Redirecionando...`;
+      sucesso.style.display = 'block';
+
+      setTimeout(() => window.location.href = 'dashboard.html', 1200);
+
+    } catch {
+      erro.textContent = 'Não foi possível conectar à API.';
+      erro.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Criar minha conta';
+    }
+  }
+</script>
+</body>
+</html>
