@@ -14,7 +14,6 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Índices por TenantId
         modelBuilder.Entity<User>()
             .HasIndex(u => u.TenantId);
 
@@ -24,12 +23,10 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<TaskItem>()
             .HasIndex(t => t.TenantId);
 
-        // Email único por tenant
         modelBuilder.Entity<User>()
             .HasIndex(u => new { u.TenantId, u.Email })
             .IsUnique();
 
-        // Evita múltiplos caminhos de cascata no SQL Server
         modelBuilder.Entity<TaskItem>()
             .HasOne(t => t.Tenant)
             .WithMany()

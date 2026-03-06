@@ -24,7 +24,6 @@ public class AuthService
 
     public async Task<LoginResponse?> LoginAsync(LoginRequest request)
     {
-        // Resolve o tenant pelo slug
         var tenant = await _userRepository.GetTenantBySlugAsync(request.Slug);
         if (tenant is null) return null;
 

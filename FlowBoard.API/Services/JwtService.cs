@@ -18,8 +18,7 @@ public class JwtService : IJwtService
 
     public string GenerateToken(User user)
     {
-        // Claims são informações que ficam dentro do token
-        // O middleware lê essas claims em toda requisição
+
         var claims = new[]
         {
             new Claim("userId", user.Id.ToString()),

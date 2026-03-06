@@ -11,24 +11,19 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Banco de dados
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Repositórios (Infrastructure)
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 
-// Serviços (Application)
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ProjectService>();
 builder.Services.AddScoped<TaskService>();
 
-// JWT Service (API)
 builder.Services.AddScoped<IJwtService, JwtService>();
 
-// Autenticação JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -50,7 +45,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// CORS para o frontend React
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
