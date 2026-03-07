@@ -6,5 +6,4 @@ RUN dotnet publish FlowBoard.API/FlowBoard.API.csproj -c Release -o out
 FROM mcr.microsoft.com/dotnet/aspnet:9.0
 WORKDIR /app
 COPY --from=build /app/out .
-ENV ASPNETCORE_URLS=http://+:$PORT
-CMD dotnet FlowBoard.API.dll
+CMD ASPNETCORE_URLS=http://+:${PORT:-8080} dotnet FlowBoard.API.dll
