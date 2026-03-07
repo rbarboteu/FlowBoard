@@ -1,4 +1,4 @@
-﻿const API = 'http://localhost:5291';
+﻿const API = 'https://flowboard-production-5220.up.railway.app';
 
 const token    = sessionStorage.getItem('token');
 const userEmail = sessionStorage.getItem('email');
