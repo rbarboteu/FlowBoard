@@ -1,0 +1,11 @@
+{
+  "$schema": "https://schema.railway.app/railway-schema.json",
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "dotnet publish FlowBoard.API/FlowBoard.API.csproj -c Release -o out"
+  },
+  "deploy": {
+    "startCommand": "dotnet out/FlowBoard.API.dll",
+    "healthcheckPath": "/swagger"
+  }
+}
