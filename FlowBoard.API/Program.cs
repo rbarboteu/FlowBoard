@@ -11,41 +11,31 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? Environment.GetEnvironmentVariable("DATABASE_URL");
+var rawConn = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? Environment.GetEnvironmentVariable("DATABASE_URL")
+    ?? "";
 
-// Converte formato postgresql:// para formato Npgsql
-if (connectionString!.StartsWith("postgresql://") || connectionString.StartsWith("postgres://"))
+string npgsqlConn;
+if (rawConn.StartsWith("postgresql://") || rawConn.StartsWith("postgres://"))
 {
-    var uri = new Uri(connectionString);
-    var userInfo = uri.UserInfo.Split(':');
-    connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
+    var uri = new Uri(rawConn);
+    var user = uri.UserInfo.Split(':');
+    npgsqlConn = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={user[0]};Password={user[1]};SSL Mode=Require;Trust Server Certificate=true";
+}
+else
+{
+    npgsqlConn = rawConn;
 }
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-{
-    if (connectionString.Contains("Host=") || connectionString.Contains("host="))
-        options.UseNpgsql(connectionString);
-    else
-        options.UseSqlServer(connectionString);
-});
-
-builder.Services.AddDbContext<AppDbContext>(options =>
-{
-    if (connectionString!.StartsWith("postgresql") || connectionString.StartsWith("postgres"))
-        options.UseNpgsql(connectionString);
-    else
-        options.UseSqlServer(connectionString);
-});
+    options.UseNpgsql(npgsqlConn));
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
-
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ProjectService>();
 builder.Services.AddScoped<TaskService>();
-
 builder.Services.AddScoped<IJwtService, JwtService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -98,5 +88,4 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapGet("/api/health", () => Results.Ok(new { status = "healthy" }));
-
 app.Run();
