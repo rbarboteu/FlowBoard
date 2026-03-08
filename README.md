@@ -4,15 +4,27 @@
 
 ![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?style=flat-square&logo=dotnet)
 ![EF Core](https://img.shields.io/badge/EF_Core-9.0-512BD4?style=flat-square&logo=dotnet)
-![SQL Server](https://img.shields.io/badge/SQL_Server-2022-CC2927?style=flat-square&logo=microsoftsqlserver)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Railway-4169E1?style=flat-square&logo=postgresql)
 ![JWT](https://img.shields.io/badge/JWT-Auth-000000?style=flat-square&logo=jsonwebtokens)
+![Railway](https://img.shields.io/badge/API-Railway-0B0D0E?style=flat-square&logo=railway)
+![Vercel](https://img.shields.io/badge/Frontend-Vercel-000000?style=flat-square&logo=vercel)
 ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
+
+## 🌐 Demo ao Vivo
+
+| Serviço | URL |
+|---------|-----|
+| 🖥️ Frontend | [flow-board-rouge.vercel.app](https://flow-board-rouge.vercel.app) |
+| ⚙️ API | [flowboard-production-5220.up.railway.app](https://flowboard-production-5220.up.railway.app) |
+| 🩺 Health Check | [/api/health](https://flowboard-production-5220.up.railway.app/api/health) |
+
+---
 
 ## 📋 Sobre o Projeto
 
 FlowBoard é uma aplicação SaaS completa de gerenciamento de tarefas no estilo Kanban. Cada empresa possui seu próprio ambiente isolado (multi-tenancy), com controle de acesso por perfil (Admin/Member) e autenticação via JWT.
 
-O projeto foi construído com foco em **arquitetura limpa**, **boas práticas de segurança** e **escalabilidade**, simulando um ambiente de produção real.
+O projeto foi construído com foco em **arquitetura limpa**, **boas práticas de segurança** e **escalabilidade**, simulando um ambiente de produção real — com deploy completo em nuvem.
 
 ---
 
@@ -26,6 +38,7 @@ O projeto foi construído com foco em **arquitetura limpa**, **boas práticas de
 - ✅ **Registro de empresa** — onboarding completo com slug único
 - ✅ **BCrypt** — senhas sempre armazenadas com hash seguro
 - ✅ **Frontend responsivo** — HTML/CSS/JS puro, sem dependências
+- ✅ **Deploy em nuvem** — API no Railway, frontend no Vercel, banco PostgreSQL
 
 ---
 
@@ -102,15 +115,66 @@ Name             Email (UQ*)        Name             Id (PK)
 
 ## 🧰 Tecnologias
 
-| Camada         | Tecnologia                    |
-|----------------|-------------------------------|
-| Backend        | ASP.NET Core 9                |
-| ORM            | Entity Framework Core 9       |
-| Banco de Dados | SQL Server                    |
-| Autenticação   | JWT Bearer + BCrypt           |
-| Documentação   | Swagger / OpenAPI             |
-| Frontend       | HTML5 + CSS3 + JavaScript     |
-| Fontes         | Syne + DM Sans (Google Fonts) |
+| Camada          | Tecnologia                    |
+|-----------------|-------------------------------|
+| Backend         | ASP.NET Core 9                |
+| ORM             | Entity Framework Core 9       |
+| Banco (local)   | SQL Server                    |
+| Banco (nuvem)   | PostgreSQL (Railway)          |
+| Autenticação    | JWT Bearer + BCrypt           |
+| Documentação    | Swagger / OpenAPI             |
+| Frontend        | HTML5 + CSS3 + JavaScript     |
+| Fontes          | Syne + DM Sans (Google Fonts) |
+| Deploy API      | Railway (Docker + .NET 9)     |
+| Deploy Frontend | Vercel                        |
+
+---
+
+## ☁️ Deploy
+
+### Infraestrutura
+
+```
+GitHub ──push──► Railway (build Docker) ──► API .NET 9
+                       │
+                       └──► PostgreSQL (Railway internal network)
+
+GitHub ──push──► Vercel ──► Frontend estático
+```
+
+### Como funciona o deploy da API
+
+A API é deployada via **Dockerfile** no Railway. A cada push na branch `main`, o Railway reconstrói a imagem automaticamente.
+
+O `Program.cs` detecta automaticamente o banco correto:
+- **Localmente**: usa SQL Server via `appsettings.json`
+- **Em produção**: recebe a `DATABASE_URL` do Railway e converte para o formato Npgsql automaticamente
+
+As migrations do EF Core rodam automaticamente no startup via `db.Database.Migrate()`, criando todas as tabelas no PostgreSQL sem nenhuma intervenção manual.
+
+### Variáveis de ambiente (Railway)
+
+| Variável | Descrição |
+|----------|-----------|
+| `ConnectionStrings__DefaultConnection` | URL de conexão PostgreSQL |
+| `Jwt__Secret` | Chave secreta para assinatura JWT |
+| `Jwt__Issuer` | Issuer do token JWT |
+| `Jwt__Audience` | Audience do token JWT |
+| `ASPNETCORE_ENVIRONMENT` | `Production` |
+
+### Dockerfile
+
+```dockerfile
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /app
+COPY . .
+RUN dotnet publish FlowBoard.API/FlowBoard.API.csproj -c Release -o out
+
+FROM mcr.microsoft.com/dotnet/aspnet:9.0
+WORKDIR /app
+COPY --from=build /app/out .
+CMD ASPNETCORE_URLS=http://+:${PORT:-8080} dotnet FlowBoard.API.dll
+```
 
 ---
 
@@ -128,7 +192,12 @@ cd FlowBoard
 
 ### 2. Configure a connection string
 
-Edite `FlowBoard.API/appsettings.json`:
+Copie o arquivo de exemplo:
+```bash
+cp FlowBoard.API/appsettings.Example.json FlowBoard.API/appsettings.json
+```
+
+Edite `FlowBoard.API/appsettings.json` com suas configurações:
 ```json
 {
   "ConnectionStrings": {
@@ -141,6 +210,8 @@ Edite `FlowBoard.API/appsettings.json`:
   }
 }
 ```
+
+> ⚠️ O arquivo `appsettings.json` está no `.gitignore` e nunca é commitado.
 
 ### 3. Execute as migrations
 ```bash
@@ -188,12 +259,21 @@ Abra `frontend/index.html` no navegador ou acesse `http://localhost:5291/swagger
 |--------|------|-----------|
 | GET | `/api/users` | Lista usuários do tenant |
 
+### Health
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | `/api/health` | Verifica se a API está no ar |
+
 ---
 
-## 📄 Licença
+## 🔒 Segurança
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+- Senhas armazenadas com **BCrypt** (nunca em texto puro)
+- JWT com expiração de **7 dias**
+- `appsettings.json` no `.gitignore` — segredos nunca vão para o repositório
+- `appsettings.Example.json` com valores de placeholder para referência
+- TenantId sempre extraído do token JWT — nunca aceito do body da requisição
+- CORS configurado para aceitar qualquer origem (adequado para demo)
 
----
 
 <p align="center">Desenvolvido por <a href="https://github.com/rbarboteu">rbarboteu</a></p>
